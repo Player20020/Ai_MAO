@@ -1,0 +1,104 @@
+:root {
+    --primary: #00f2ff;
+    --secondary: #7000ff;
+    --bg-dark: #050608;
+    --card-bg: rgba(20, 22, 26, 0.8);
+    --text: #e0e6ed;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text);
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+header { text-align: center; margin-bottom: 40px; }
+
+.glitch {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--primary);
+    text-shadow: 0 0 10px var(--primary);
+    letter-spacing: 5px;
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+    background: var(--card-bg);
+    border: 1px solid var(--secondary);
+    border-radius: 10px;
+    color: #fff;
+    padding: 15px;
+    font-size: 1rem;
+    resize: none;
+    box-shadow: inset 0 0 10px rgba(112, 0, 255, 0.2);
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    margin-top: 15px;
+    background: linear-gradient(90deg, var(--secondary), var(--primary));
+    border: none;
+    border-radius: 10px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: 0.3s;
+}
+
+button:hover {
+    box-shadow: 0 0 20px var(--primary);
+    transform: scale(1.01);
+}
+
+.final-verdict {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid var(--primary);
+    margin-top: 30px;
+}
+
+.grid-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.agent-card {
+    background: #111418;
+    padding: 15px;
+    border-radius: 10px;
+    border-top: 3px solid var(--secondary);
+    font-size: 0.9rem;
+}
+
+.hidden { display: none; }
+
+/* Анимация сканера */
+.scanner {
+    width: 100%;
+    height: 2px;
+    background: var(--primary);
+    box-shadow: 0 0 15px var(--primary);
+    animation: scan 2s infinite;
+}
+
+@keyframes scan {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(20px); }
+    100% { transform: translateY(0); }
+}
