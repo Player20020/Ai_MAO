@@ -3,54 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI NEXUS | Council of Agents</title>
+    <title>AI NEXUS | Council of Five</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="stars"></div>
-    <div class="container">
+    <div class="app-container">
         <header>
-            <h1 class="glitch" data-text="AI NEXUS">AI NEXUS</h1>
-            <p class="subtitle">Система мульти-агентного анализа</p>
+            <div class="logo-wrapper">
+                <h1 class="neon-text">AI NEXUS</h1>
+                <div class="tagline">Multimodal Agent Intelligence</div>
+            </div>
+            <button id="openSettings" class="btn-settings">⚙ CONFIG</button>
         </header>
 
-        <div class="input-section">
-            <textarea id="userInput" placeholder="Введите ваш запрос для анализа Ордой..."></textarea>
-            <button id="sendBtn">ЗАПУСТИТЬ ПРОТОКОЛ</button>
-        </div>
-
-        <div id="loader" class="hidden">
-            <div class="scanner"></div>
-            <p id="status">Идет синхронизация агентов...</p>
-        </div>
-
-        <div id="resultArea" class="hidden">
-            <div class="final-verdict shadow-neon">
-                <h2><span class="icon">👑</span> Итоговый вердикт (Gemini)</h2>
-                <div id="finalAnswer" class="content"></div>
-            </div>
-
-            <button id="toggleDetails" class="btn-outline">ОТКРЫТЬ СВИТКИ ЭКСПЕРТОВ</button>
-
-            <div id="details" class="hidden grid-details">
-                <div class="agent-card" id="card-github">
-                    <h3>GPT-4o mini</h3>
-                    <div class="res-text"></div>
+        <div id="keyModal" class="modal hidden">
+            <div class="modal-content shadow-neon">
+                <h2>🔑 API ACCESS VAULT</h2>
+                <div class="input-grid">
+                    <input type="password" id="ghKey" placeholder="GitHub PAT (GPT-4o mini)">
+                    <input type="password" id="grKey" placeholder="Groq Key (Llama 3.1)">
+                    <input type="password" id="dsKey" placeholder="DeepSeek Key (V3 & R1)">
+                    <input type="password" id="gmKey" placeholder="Gemini Key (The Judge)">
                 </div>
-                <div class="agent-card" id="card-groq">
-                    <h3>Llama 3.1</h3>
-                    <div class="res-text"></div>
-                </div>
-                <div class="agent-card" id="card-ds-chat">
-                    <h3>DeepSeek V3</h3>
-                    <div class="res-text"></div>
-                </div>
-                <div class="agent-card" id="card-ds-think">
-                    <h3>DeepSeek R1 (Reasoning)</h3>
-                    <div class="res-text"></div>
+                <div class="modal-actions">
+                    <button id="saveKeys" class="btn-save">DEPLOY KEYS</button>
+                    <button id="closeSettings" class="btn-close">CLOSE</button>
                 </div>
             </div>
         </div>
+
+        <main>
+            <div class="terminal-input">
+                <textarea id="userInput" placeholder="Введите ваш запрос для анализа Ордой..."></textarea>
+                <button id="sendBtn">ИНИЦИИРОВАТЬ ПРОТОКОЛ</button>
+            </div>
+
+            <div id="loader" class="hidden">
+                <div class="glitch-loader"></div>
+                <p id="status">Синхронизация нейронных связей...</p>
+            </div>
+
+            <div id="resultArea" class="hidden">
+                <div class="verdict-card">
+                    <div class="card-header">👑 ВЕРДИКТ СУДЬИ (GEMINI)</div>
+                    <div id="finalAnswer" class="answer-content"></div>
+                </div>
+
+                <div class="agents-reports">
+                    <div class="report-node">
+                        <h3>GPT-4o mini</h3>
+                        <div id="res-github" class="res-body"></div>
+                    </div>
+                    <div class="report-node">
+                        <h3>Llama 3.1</h3>
+                        <div id="res-groq" class="res-body"></div>
+                    </div>
+                    <div class="report-node">
+                        <h3>DeepSeek V3</h3>
+                        <div id="res-ds-chat" class="res-body"></div>
+                    </div>
+                    <div class="report-node">
+                        <h3>DeepSeek R1</h3>
+                        <div id="res-ds-think" class="res-body"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
     <script src="script.js"></script>
 </body>
