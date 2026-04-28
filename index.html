@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI NEXUS | Council of Agents</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="container">
+        <header>
+            <h1 class="glitch" data-text="AI NEXUS">AI NEXUS</h1>
+            <p class="subtitle">Система мульти-агентного анализа</p>
+        </header>
+
+        <div class="input-section">
+            <textarea id="userInput" placeholder="Введите ваш запрос для анализа Ордой..."></textarea>
+            <button id="sendBtn">ЗАПУСТИТЬ ПРОТОКОЛ</button>
+        </div>
+
+        <div id="loader" class="hidden">
+            <div class="scanner"></div>
+            <p id="status">Идет синхронизация агентов...</p>
+        </div>
+
+        <div id="resultArea" class="hidden">
+            <div class="final-verdict shadow-neon">
+                <h2><span class="icon">👑</span> Итоговый вердикт (Gemini)</h2>
+                <div id="finalAnswer" class="content"></div>
+            </div>
+
+            <button id="toggleDetails" class="btn-outline">ОТКРЫТЬ СВИТКИ ЭКСПЕРТОВ</button>
+
+            <div id="details" class="hidden grid-details">
+                <div class="agent-card" id="card-github">
+                    <h3>GPT-4o mini</h3>
+                    <div class="res-text"></div>
+                </div>
+                <div class="agent-card" id="card-groq">
+                    <h3>Llama 3.1</h3>
+                    <div class="res-text"></div>
+                </div>
+                <div class="agent-card" id="card-ds-chat">
+                    <h3>DeepSeek V3</h3>
+                    <div class="res-text"></div>
+                </div>
+                <div class="agent-card" id="card-ds-think">
+                    <h3>DeepSeek R1 (Reasoning)</h3>
+                    <div class="res-text"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
