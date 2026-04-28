@@ -1,129 +1,83 @@
-// Конфигурация ключей (Твои актуальные ключи уже здесь)
+// Конфигурация ключей (Берем из памяти браузера)
 const KEYS = {
-    github: "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",
-    groq: "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", 
-    deepseek: "sk-21ea49c8daba463090ea78c4bf54fbb4",
-    gemini: "AIzaSyBaC5_HJc-wv4FP48TdN2n-dwDzWxHMImI" 
+    gh: localStorage.getItem('ax_gh'),
+    gr: localStorage.getItem('ax_gr'),
+    ds: localStorage.getItem('ax_ds'),
+    gm: localStorage.getItem('ax_gm')
 };
 
-const sendBtn = document.getElementById('sendBtn');
-const loader = document.getElementById('loader');
-const statusText = document.getElementById('status');
-const resultArea = document.getElementById('resultArea');
+// Если ключей нет, открываем модалку сразу
+if (!KEYS.gh || !KEYS.gm) document.getElementById('keyModal').classList.remove('hidden');
 
-// Универсальная функция для запросов (OpenAI Format)
-async function fetchAgent(url, key, model, prompt) {
+// Управление настройками
+document.getElementById('openSettings').onclick = () => document.getElementById('keyModal').classList.remove('hidden');
+document.getElementById('closeSettings').onclick = () => document.getElementById('keyModal').classList.add('hidden');
+
+document.getElementById('saveKeys').onclick = () => {
+    localStorage.setItem('ax_gh', document.getElementById('ghKey').value);
+    localStorage.setItem('ax_gr', document.getElementById('grKey').value);
+    localStorage.setItem('ax_ds', document.getElementById('dsKey').value);
+    localStorage.setItem('ax_gm', document.getElementById('gmKey').value);
+    alert("Ключи сохранены! Перезагрузка...");
+    location.reload();
+};
+
+// Функция для работы с агентами
+async function callAgent(url, key, model, prompt) {
+    if (!key) return "Ключ отсутствует";
     try {
-        const res = await fetch(url, {
+        const response = await fetch(url, {
             method: "POST",
-            headers: {
-                "Authorization": `Bearer ${key}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: model,
-                messages: [{ role: "user", content: prompt }],
-                temperature: 0.7
-            })
+            headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ model: model, messages: [{ role: "user", content: prompt }] })
         });
-        
-        if (!res.ok) throw new Error(`Status: ${res.status}`);
-        
-        const data = await res.json();
+        const data = await response.json();
         return data.choices[0].message.content;
-    } catch (e) {
-        console.error(`Ошибка модели ${model}:`, e);
-        return `[Агент ${model} временно недоступен или превышен лимит]`;
-    }
+    } catch (e) { return "Ошибка агента: " + model; }
 }
 
-// Специальная функция для Судьи (Google Gemini)
-async function fetchGeminiJudge(userQuery, agentsAnswers) {
-    const judgePrompt = `Ты — Верховный Судья нейросетевого совета. 
-    Твоя задача: Прочитать ответы четырех разных ИИ-агентов на вопрос пользователя и составить один ИДЕАЛЬНЫЙ, подробный и структурированный ответ. 
-    Убери повторы, исправь фактические ошибки, если они есть у агентов, и выбери самый крутой стиль изложения.
-    
-    ВОПРОС ПОЛЬЗОВАТЕЛЯ: "${userQuery}"
-    
-    ОТВЕТЫ АГЕНТОВ:
-    ${agentsAnswers}
-    
-    ТВОЙ ИТОГОВЫЙ ВЕРДИКТ:`;
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEYS.gemini}`;
-    
+// Вызов Судьи (Gemini)
+async function callJudge(query, answers) {
+    const judgePrompt = `Ты - Верховный ИИ. Проанализируй эти 4 ответа и составь один финальный: \n${answers}\n\nВопрос: ${query}`;
     try {
-        const res = await fetch(url, {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEYS.gm}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: judgePrompt }] }]
-            })
+            body: JSON.stringify({ contents: [{ parts: [{ text: judgePrompt }] }] })
         });
         const data = await res.json();
         return data.candidates[0].content.parts[0].text;
-    } catch (e) {
-        return "Ошибка Судьи: Не удалось собрать ответы воедино. Проверьте лимиты Gemini.";
-    }
+    } catch (e) { return "Судья не смог вынести вердикт."; }
 }
 
-// Главный процесс
-sendBtn.onclick = async () => {
-    const query = document.getElementById('userInput').value.trim();
-    if (!query) {
-        alert("Сначала введите запрос, хозяин!");
-        return;
-    }
+// Главный запуск
+document.getElementById('sendBtn').onclick = async () => {
+    const query = document.getElementById('userInput').value;
+    if (!query) return;
 
-    // Подготовка интерфейса
-    sendBtn.disabled = true;
-    loader.classList.remove('hidden');
-    resultArea.classList.add('hidden');
-    statusText.innerText = "Орда начала обсуждение...";
+    document.getElementById('loader').classList.remove('hidden');
+    document.getElementById('resultArea').classList.add('hidden');
 
-    // 1. Опрашиваем всех агентов одновременно
-    const agentPromises = [
-        fetchAgent("https://models.inference.ai.azure.com/chat/completions", KEYS.github, "gpt-4o-mini", query),
-        fetchAgent("https://api.groq.com/openai/v1/chat/completions", KEYS.groq, "llama3-8b-8192", query),
-        fetchAgent("https://api.deepseek.com/chat/completions", KEYS.deepseek, "deepseek-chat", query),
-        fetchAgent("https://api.deepseek.com/chat/completions", KEYS.deepseek, "deepseek-reasoner", query)
+    // Параллельный опрос всех агентов
+    const tasks = [
+        callAgent("https://models.inference.ai.azure.com/chat/completions", KEYS.gh, "gpt-4o-mini", query),
+        callAgent("https://api.groq.com/openai/v1/chat/completions", KEYS.gr, "llama3-8b-8192", query),
+        callAgent("https://api.deepseek.com/chat/completions", KEYS.ds, "deepseek-chat", query),
+        callAgent("https://api.deepseek.com/chat/completions", KEYS.ds, "deepseek-reasoner", query)
     ];
 
-    const responses = await Promise.all(agentPromises);
-    const [resGithub, resGroq, resDSChat, resDSThink] = responses;
+    const [gh, gr, dsC, dsR] = await Promise.all(tasks);
 
-    // Выводим ответы в "скрытые свитки"
-    document.querySelector('#card-github .res-text').innerText = resGithub;
-    document.querySelector('#card-groq .res-text').innerText = resGroq;
-    document.querySelector('#card-ds-chat .res-text').innerText = resDSChat;
-    document.querySelector('#card-ds-think .res-text').innerText = resDSThink;
+    // Заполняем отчеты
+    document.getElementById('res-github').innerText = gh;
+    document.getElementById('res-groq').innerText = gr;
+    document.getElementById('res-ds-chat').innerText = dsC;
+    document.getElementById('res-ds-think').innerText = dsR;
 
-    statusText.innerText = "Судья выносит вердикт...";
-
-    // 2. Формируем контекст для Судьи
-    const fullContext = `
-    1. GPT-4o-mini: ${resGithub}
-    2. Llama 3.1: ${resGroq}
-    3. DeepSeek V3: ${resDSChat}
-    4. DeepSeek R1: ${resDSThink}
-    `;
-
-    // 3. Получаем финальный ответ от Gemini
-    const finalVerdict = await fetchGeminiJudge(query, fullContext);
-
-    // 4. Показываем результат
-    document.getElementById('finalAnswer').innerText = finalVerdict;
+    // Получаем ответ от Судьи
+    const verdict = await callJudge(query, `GPT: ${gh}\nLlama: ${gr}\nDS V3: ${dsC}\nDS R1: ${dsR}`);
     
-    loader.classList.add('hidden');
-    resultArea.classList.remove('hidden');
-    sendBtn.disabled = false;
+    document.getElementById('finalAnswer').innerText = verdict;
+    document.getElementById('loader').classList.add('hidden');
+    document.getElementById('resultArea').classList.remove('hidden');
 };
-
-// Кнопка подробностей
-document.getElementById('toggleDetails').onclick = () => {
-    const details = document.getElementById('details');
-    details.classList.toggle('hidden');
-    const isHidden = details.classList.contains('hidden');
-    document.getElementById('toggleDetails').innerText = isHidden ? "ОТКРЫТЬ СВИТКИ ЭКСПЕРТОВ" : "СКРЫТЬ ПОДРОБНОСТИ";
-};
-
