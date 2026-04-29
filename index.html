@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KalajerAI System</title>
+    <title>KalajerAI | Sandbox Protocol</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h1>📡 KALAJER<span class="ai-brand">AI</span> <span class="version">v7.5</span></h1>
+        <h1>📡 KALAJER<span class="ai-brand">AI</span> <span class="version">v9.5</span></h1>
         <button id="configBtn">⚙ CONFIG</button>
     </header>
 
@@ -25,21 +25,21 @@
 
         <div id="resultArea" class="hidden">
             <div class="judge-card">
-                <h2>💠 ВЕРХОВНЫЙ ПРОТОКОЛ (CORE)</h2>
+                <h2>💠 CORE (ВЕРХОВНЫЙ ПРОТОКОЛ)</h2>
                 <div id="finalAnswer" class="res-body"></div>
             </div>
 
             <div class="agents-grid">
                 <div class="agent-card">
-                    <h3>АГЕНТ: AETHER-1</h3>
+                    <h3>АГЕНТ: AETHER-1 (Базис)</h3>
                     <div id="res-github" class="res-body">Ожидание...</div>
                 </div>
                 <div class="agent-card">
-                    <h3>АГЕНТ: VOID-2</h3>
+                    <h3>АГЕНТ: VOID-2 (Критик)</h3>
                     <div id="res-groq" class="res-body">Ожидание...</div>
                 </div>
                 <div class="agent-card">
-                    <h3>АГЕНТ: PULSE-3</h3>
+                    <h3>АГЕНТ: PULSE-3 (Синтез)</h3>
                     <div id="res-gemini-agent" class="res-body">Ожидание...</div>
                 </div>
             </div>
@@ -49,10 +49,10 @@
     <div id="keyModal" class="modal hidden">
         <div class="modal-content">
             <h2>🔑 СИСТЕМНЫЕ КЛЮЧИ</h2>
-            <input type="password" id="ghKey" placeholder="Access Key 1">
-            <input type="password" id="grKey" placeholder="Access Key 2">
-            <input type="password" id="gmAgentKey" placeholder="Access Key 3">
-            <input type="password" id="gmJudgeKey" placeholder="Access Key 4">
+            <input type="password" id="ghKey" placeholder="Access Key 1 (AETHER)">
+            <input type="password" id="grKey" placeholder="Access Key 2 (VOID)">
+            <input type="password" id="gmAgentKey" placeholder="Access Key 3 (PULSE)">
+            <input type="password" id="gmJudgeKey" placeholder="Access Key 4 (CORE)">
             <div class="modal-buttons">
                 <button id="saveKeys">DEPLOY</button>
                 <button id="closeModal" class="close-btn">ЗАКРЫТЬ</button>
