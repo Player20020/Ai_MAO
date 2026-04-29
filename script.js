@@ -1,12 +1,11 @@
-// AI NEXUS | Multimodal Agent Intelligence - CORE LOGIC v1.2
+// AI NEXUS | CORE PROTOCOL v6.5 - DUAL GEMINI EDITION
 const UI = {
-    gh: localStorage.getItem('ax_gh'),
-    gr: localStorage.getItem('ax_gr'),
-    ds: localStorage.getItem('ax_ds'),
-    gm: localStorage.getItem('ax_gm')
+    gh: localStorage.getItem('ax_gh'),          // GitHub (GPT-4o mini)
+    gr: localStorage.getItem('ax_gr'),          // Groq (Llama 3.3)
+    gm_agent: localStorage.getItem('ax_gm_a'),  // Gemini Агент (Ключ 1 - 2.5 Flash)
+    gm_judge: localStorage.getItem('ax_gm_j')   // Gemini Судья (Ключ 2 - 3.1 Flash)
 };
 
-// UI Elements
 const els = {
     send: document.getElementById('sendBtn'),
     in: document.getElementById('userInput'),
@@ -14,96 +13,130 @@ const els = {
     st: document.getElementById('status'),
     res: document.getElementById('resultArea'),
     final: document.getElementById('finalAnswer'),
-    mod: document.getElementById('keyModal')
+    mod: document.getElementById('keyModal'),
+    // Поля ввода в модалке
+    inGh: document.getElementById('ghKey'),
+    inGr: document.getElementById('grKey'),
+    inGmA: document.getElementById('gmAgentKey'),
+    inGmJ: document.getElementById('gmJudgeKey')
 };
 
-// Проверка ключей
-if (!UI.gh || !UI.gm) els.mod.classList.remove('hidden');
+// Проверка: если хоть одного ключа нет, показываем настройки
+if (!UI.gh || !UI.gr || !UI.gm_agent || !UI.gm_judge) {
+    els.mod.classList.remove('hidden');
+}
 
-// Управление настройками
-document.getElementById('openSettings').onclick = () => els.mod.classList.remove('hidden');
-document.getElementById('closeSettings').onclick = () => els.mod.classList.add('hidden');
-
+// Сохранение ключей в память браузера
 document.getElementById('saveKeys').onclick = () => {
-    localStorage.setItem('ax_gh', document.getElementById('ghKey').value.trim());
-    localStorage.setItem('ax_gr', document.getElementById('grKey').value.trim());
-    localStorage.setItem('ax_ds', document.getElementById('dsKey').value.trim());
-    localStorage.setItem('ax_gm', document.getElementById('gmKey').value.trim());
-    alert("Ключи DEPLOYED! Перезагрузка...");
+    localStorage.setItem('ax_gh', els.inGh.value.trim());
+    localStorage.setItem('ax_gr', els.inGr.value.trim());
+    localStorage.setItem('ax_gm_a', els.inGmA.value.trim());
+    localStorage.setItem('ax_gm_j', els.inGmJ.value.trim());
+    alert("ПРОТОКОЛ ОБНОВЛЕН. Перезагрузка системы...");
     location.reload();
 };
 
 /**
- * Улучшенный callAgent с диагностикой ошибок
+ * Вызов OpenAI-совместимых API (GitHub, Groq)
  */
-async function callAgent(url, key, model, prompt, uiNodeId) {
+async function callOpenAI(url, key, model, prompt, uiNodeId) {
     const node = document.getElementById(uiNodeId);
-    if (!key) { node.innerText = "❌ KEY MISSING"; return "ERR_NO_KEY"; }
-
-    node.innerText = "⏳ Ожидаю...";
+    if (!key) return "ERR_NO_KEY";
+    
+    node.innerText = "⏳ Синхронизация...";
     try {
-        const response = await fetch(url, {
+        const r = await fetch(url, {
             method: "POST",
-            headers: { 
-                "Authorization": `Bearer ${key}`, 
-                "Content-Type": "application/json",
-                // "Origin": window.location.origin // DeepSeek can be picky
-            },
-            body: JSON.stringify({ model: model, messages: [{ role: "user", content: prompt }], temperature: 0.7 })
+            headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                model: model, 
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.7 
+            })
         });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error?.message || `Status ${r.status}`);
         
-        if (!response.ok) {
-            const errBody = await response.text();
-            throw new Error(`STATUS: ${response.status} | BODY: ${errBody.substring(0, 50)}`);
-        }
-
-        const data = await response.json();
-        const content = data.choices[0].message.content;
-        node.innerText = content.substring(0, 100) + "..."; // Кратко в карточку
+        const content = d.choices[0].message.content;
+        node.innerText = content.substring(0, 300) + (content.length > 300 ? "..." : "");
         return content;
     } catch (e) { 
-        node.innerText = `❌ ${e.message}`;
-        console.error(`Error in ${model}:`, e);
-        return "ERR_AGENT"; 
+        node.innerHTML = `<span style="color:#ff4b4b">❌ ${e.message}</span>`;
+        return "AGENT_OFFLINE";
     }
 }
 
-async function callJudge(query, answers) {
-    if (!UI.gm) return "Судья не настроен.";
-    const p = `Ты Верховный ИИ. Сделай один крутой структурированный ответ из 4 экспертных мнений. Markdown разрешен. Вопрос: ${query}\n\nМнения:\n${answers}`;
+/**
+ * Вызов Google Gemini API
+ */
+async function callGemini(key, model, prompt, uiNodeId) {
+    const node = uiNodeId ? document.getElementById(uiNodeId) : null;
+    if (!key) return "ERR_NO_KEY";
+
+    if (node) node.innerText = "⏳ Анализ потока...";
+    // Используем v1beta для доступа к новейшим моделям
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
     
     try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${UI.gm}`, {
+        const r = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents: [{ parts: [{ text: p }] }] })
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
-        const d = await res.json();
-        return d.candidates[0].content.parts[0].text;
-    } catch (e) { return "Ошибка Судьи при агрегации."; }
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error?.message || "Gemini API Error");
+        
+        const content = d.candidates[0].content.parts[0].text;
+        if (node) node.innerText = content.substring(0, 300) + (content.length > 300 ? "..." : "");
+        return content;
+    } catch (e) {
+        if (node) node.innerHTML = `<span style="color:#ff4b4b">❌ ${e.message}</span>`;
+        return "GEMINI_OFFLINE";
+    }
 }
 
+/**
+ * ГЛАВНЫЙ ЗАПУСК
+ */
 els.send.onclick = async () => {
-    const q = els.in.value.trim();
-    if (!q) return;
+    const query = els.in.value.trim();
+    if (!query) return;
 
     els.ld.classList.remove('hidden');
     els.res.classList.add('hidden');
-    els.st.innerText = "Синхронизация Орды...";
+    els.st.innerText = "Опрашиваю Совет Агентов...";
 
+    // Запускаем 3-х агентов параллельно
     const tasks = [
-        callAgent("https://models.inference.ai.azure.com/chat/completions", UI.gh, "gpt-4o-mini", q, 'res-github'),
-        callAgent("https://api.groq.com/openai/v1/chat/completions", UI.gr, "llama3-8b-8192", q, 'res-groq'),
-        callAgent("https://api.deepseek.com/chat/completions", UI.ds, "deepseek-chat", q, 'res-ds-chat'),
-        callAgent("https://api.deepseek.com/chat/completions", UI.ds, "deepseek-reasoner", q, 'res-ds-think')
+        // Агент 1: GitHub (GPT-4o mini)
+        callOpenAI("https://models.inference.ai.azure.com/chat/completions", UI.gh, "gpt-4o-mini", query, 'res-github'),
+        
+        // Агент 2: Groq (Llama 3.3 70B)
+        callOpenAI("https://api.groq.com/openai/v1/chat/completions", UI.gr, "llama-3.3-70b-versatile", query, 'res-groq'),
+        
+        // Агент 3: Gemini 2.5 Flash (Ключ Агента)
+        // Используем id 'res-ds-chat' из твоего старого HTML для совместимости
+        callGemini(UI.gm_agent, "gemini-1.5-flash", query, 'res-ds-chat') 
     ];
 
     const results = await Promise.all(tasks);
-
-    els.st.innerText = "Судья Gemini выносит вердикт...";
-    const verdict = await callJudge(q, `GPT: ${results[0]}\nLlama: ${results[1]}\nDS V3: ${results[2]}\nDS R1: ${results[3]}`);
+    
+    els.st.innerText = "Верховный Судья Gemini 3.1 Flash формирует вердикт...";
+    
+    const judgePrompt = `Ты — Верховный Судья на базе Gemini 3.1 Flash. 
+    Твоя задача: изучить ответы трех экспертов и выдать ОДИН идеальный, структурированный ответ.
+    
+    ЗАПРОС ПОЛЬЗОВАТЕЛЯ: ${query}
+    
+    МНЕНИЕ GPT-4o: ${results[0]}
+    МНЕНИЕ LLAMA 3.3: ${results[1]}
+    МНЕНИЕ GEMINI 2.5: ${results[2]}`;
+    
+    // ВЫЗОВ СУДЬИ (Используем второй ключ и модель)
+    const verdict = await callGemini(UI.gm_judge, "gemini-1.5-flash", judgePrompt, null);
     
     els.final.innerHTML = verdict.replace(/\n/g, '<br>');
     els.ld.classList.add('hidden');
     els.res.classList.remove('hidden');
 };
+
