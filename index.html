@@ -3,43 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI NEXUS | Орда</title>
+    <title>KalajerAI System</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h1>🤖 AI NEXUS <span class="version">v7.0</span></h1>
+        <h1>📡 KALAJER<span class="ai-brand">AI</span> <span class="version">v7.5</span></h1>
         <button id="configBtn">⚙ CONFIG</button>
     </header>
 
     <main>
         <div class="input-section">
-            <textarea id="userInput" placeholder="Введи запрос для Орды..."></textarea>
-            <button id="sendBtn">ИНИЦИИРОВАТЬ ПРОТОКОЛ</button>
+            <textarea id="userInput" placeholder="Введите директиву для системы..."></textarea>
+            <button id="sendBtn">ЗАПУСК СИСТЕМЫ</button>
         </div>
 
         <div id="loader" class="hidden">
             <div class="spinner"></div>
-            <p id="status">Подключение к нейросетям...</p>
+            <p id="status">KalajerAI thinking</p>
         </div>
 
         <div id="resultArea" class="hidden">
             <div class="judge-card">
-                <h2>👑 ВЕРДИКТ СУДЬИ (Gemini 3.1)</h2>
+                <h2>💠 ВЕРХОВНЫЙ ПРОТОКОЛ (CORE)</h2>
                 <div id="finalAnswer" class="res-body"></div>
             </div>
 
             <div class="agents-grid">
                 <div class="agent-card">
-                    <h3>GPT-4o mini</h3>
+                    <h3>АГЕНТ: AETHER-1</h3>
                     <div id="res-github" class="res-body">Ожидание...</div>
                 </div>
                 <div class="agent-card">
-                    <h3>Llama 3.3 70B</h3>
+                    <h3>АГЕНТ: VOID-2</h3>
                     <div id="res-groq" class="res-body">Ожидание...</div>
                 </div>
                 <div class="agent-card">
-                    <h3>Gemini 2.5 Flash</h3>
+                    <h3>АГЕНТ: PULSE-3</h3>
                     <div id="res-gemini-agent" class="res-body">Ожидание...</div>
                 </div>
             </div>
@@ -48,14 +48,13 @@
 
     <div id="keyModal" class="modal hidden">
         <div class="modal-content">
-            <h2>🔑 КЛЮЧИ ДОСТУПА</h2>
-            <p>Введи API ключи для активации агентов.</p>
-            <input type="password" id="ghKey" placeholder="GitHub PAT (Models)">
-            <input type="password" id="grKey" placeholder="Groq API Key">
-            <input type="password" id="gmAgentKey" placeholder="Gemini Agent Key (2.5)">
-            <input type="password" id="gmJudgeKey" placeholder="Gemini Judge Key (3.1)">
+            <h2>🔑 СИСТЕМНЫЕ КЛЮЧИ</h2>
+            <input type="password" id="ghKey" placeholder="Access Key 1">
+            <input type="password" id="grKey" placeholder="Access Key 2">
+            <input type="password" id="gmAgentKey" placeholder="Access Key 3">
+            <input type="password" id="gmJudgeKey" placeholder="Access Key 4">
             <div class="modal-buttons">
-                <button id="saveKeys">DEPLOY (СОХРАНИТЬ)</button>
+                <button id="saveKeys">DEPLOY</button>
                 <button id="closeModal" class="close-btn">ЗАКРЫТЬ</button>
             </div>
         </div>
