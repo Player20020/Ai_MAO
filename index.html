@@ -3,73 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI NEXUS | Council of Five</title>
+    <title>AI NEXUS | Орда</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="app-container">
-        <header>
-            <div class="logo-wrapper">
-                <h1 class="neon-text">AI NEXUS</h1>
-                <div class="tagline">Multimodal Agent Intelligence</div>
-            </div>
-            <button id="openSettings" class="btn-settings">⚙ CONFIG</button>
-        </header>
+    <header>
+        <h1>🤖 AI NEXUS <span class="version">v7.0</span></h1>
+        <button id="configBtn">⚙ CONFIG</button>
+    </header>
 
-        <div id="keyModal" class="modal hidden">
-            <div class="modal-content shadow-neon">
-                <h2>🔑 API ACCESS VAULT</h2>
-                <div class="input-grid">
-                    <input type="password" id="ghKey" placeholder="GitHub PAT (GPT-4o mini)">
-                    <input type="password" id="grKey" placeholder="Groq Key (Llama 3.1)">
-                    <input type="password" id="dsKey" placeholder="DeepSeek Key (V3 & R1)">
-                    <input type="password" id="gmKey" placeholder="Gemini Key (The Judge)">
+    <main>
+        <div class="input-section">
+            <textarea id="userInput" placeholder="Введи запрос для Орды..."></textarea>
+            <button id="sendBtn">ИНИЦИИРОВАТЬ ПРОТОКОЛ</button>
+        </div>
+
+        <div id="loader" class="hidden">
+            <div class="spinner"></div>
+            <p id="status">Подключение к нейросетям...</p>
+        </div>
+
+        <div id="resultArea" class="hidden">
+            <div class="judge-card">
+                <h2>👑 ВЕРДИКТ СУДЬИ (Gemini 3.1)</h2>
+                <div id="finalAnswer" class="res-body"></div>
+            </div>
+
+            <div class="agents-grid">
+                <div class="agent-card">
+                    <h3>GPT-4o mini</h3>
+                    <div id="res-github" class="res-body">Ожидание...</div>
                 </div>
-                <div class="modal-actions">
-                    <button id="saveKeys" class="btn-save">DEPLOY KEYS</button>
-                    <button id="closeSettings" class="btn-close">CLOSE</button>
+                <div class="agent-card">
+                    <h3>Llama 3.3 70B</h3>
+                    <div id="res-groq" class="res-body">Ожидание...</div>
+                </div>
+                <div class="agent-card">
+                    <h3>Gemini 2.5 Flash</h3>
+                    <div id="res-gemini-agent" class="res-body">Ожидание...</div>
                 </div>
             </div>
         </div>
+    </main>
 
-        <main>
-            <div class="terminal-input">
-                <textarea id="userInput" placeholder="Введите ваш запрос для анализа Ордой..."></textarea>
-                <button id="sendBtn">ИНИЦИИРОВАТЬ ПРОТОКОЛ</button>
+    <div id="keyModal" class="modal hidden">
+        <div class="modal-content">
+            <h2>🔑 КЛЮЧИ ДОСТУПА</h2>
+            <p>Введи API ключи для активации агентов.</p>
+            <input type="password" id="ghKey" placeholder="GitHub PAT (Models)">
+            <input type="password" id="grKey" placeholder="Groq API Key">
+            <input type="password" id="gmAgentKey" placeholder="Gemini Agent Key (2.5)">
+            <input type="password" id="gmJudgeKey" placeholder="Gemini Judge Key (3.1)">
+            <div class="modal-buttons">
+                <button id="saveKeys">DEPLOY (СОХРАНИТЬ)</button>
+                <button id="closeModal" class="close-btn">ЗАКРЫТЬ</button>
             </div>
-
-            <div id="loader" class="hidden">
-                <div class="glitch-loader"></div>
-                <p id="status">Синхронизация нейронных связей...</p>
-            </div>
-
-            <div id="resultArea" class="hidden">
-                <div class="verdict-card">
-                    <div class="card-header">👑 ВЕРДИКТ СУДЬИ (GEMINI)</div>
-                    <div id="finalAnswer" class="answer-content"></div>
-                </div>
-
-                <div class="agents-reports">
-                    <div class="report-node">
-                        <h3>GPT-4o mini</h3>
-                        <div id="res-github" class="res-body"></div>
-                    </div>
-                    <div class="report-node">
-                        <h3>Llama 3.1</h3>
-                        <div id="res-groq" class="res-body"></div>
-                    </div>
-                    <div class="report-node">
-                        <h3>DeepSeek V3</h3>
-                        <div id="res-ds-chat" class="res-body"></div>
-                    </div>
-                    <div class="report-node">
-                        <h3>DeepSeek R1</h3>
-                        <div id="res-ds-think" class="res-body"></div>
-                    </div>
-                </div>
-            </div>
-        </main>
+        </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
