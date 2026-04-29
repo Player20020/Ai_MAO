@@ -211,3 +211,14 @@ textarea:focus {
 }
 
 .hidden { display: none !important; }
+.ai-brand {
+    color: #00d2ff;
+    font-weight: 800;
+}
+
+#status {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    color: #00d2ff;
+    letter-spacing: 1px;
+}
