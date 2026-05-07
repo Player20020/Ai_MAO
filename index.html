@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ru" data-theme="neon-night">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Synapse — Multi-Agent Sandbox</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Top bar -->
+  <header class="topbar" data-testid="topbar">
+    <div class="brand">
+      <span class="brand-mark"></span>
+      <span class="brand-name">SYNAPSE</span>
+      <span class="brand-tag" data-i18n="brand_tag">мульти-агентная песочница</span>
+    </div>
+    <div class="topbar-controls">
+      <select id="lang-select" data-testid="lang-select" aria-label="Language">
+        <option value="ru">RU</option>
+        <option value="en">EN</option>
+      </select>
+      <select id="theme-select" data-testid="theme-select" aria-label="Theme"></select>
+      <button id="open-settings" class="ghost-btn" data-testid="open-settings" data-i18n="settings">Настройки</button>
+      <button id="reset-all" class="ghost-btn danger" data-testid="reset-all" data-i18n="reset_all">Сброс</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- LEFT: agents column -->
+    <aside class="agents-pane" data-testid="agents-pane">
+      <div class="pane-head">
+        <h2 data-i18n="agents_title">Агенты</h2>
+        <span class="counter"><span id="agent-count" data-testid="agent-count">0</span>/20</span>
+      </div>
+
+      <div class="agents-list" id="agents-list" data-testid="agents-list"></div>
+
+      <button id="add-agent" class="primary-btn" data-testid="add-agent">
+        <span class="plus">+</span> <span data-i18n="add_agent">Добавить агента</span>
+      </button>
+
+      <div class="config-block">
+        <label><span data-i18n="rounds_label">Раундов обсуждения:</span> <span id="rounds-value" data-testid="rounds-value">3</span></label>
+        <input type="range" id="rounds-slider" min="3" max="10" value="3" data-testid="rounds-slider" />
+
+        <label data-i18n="finalmode_label">Режим финального ответа</label>
+        <div class="seg-control" role="tablist">
+          <button class="seg active" data-mode="moderator" data-testid="mode-moderator" data-i18n="mode_moderator">Модератор</button>
+          <button class="seg" data-mode="collaborative" data-testid="mode-collaborative" data-i18n="mode_collab">Коллективно</button>
+        </div>
+        <p class="hint" id="mode-hint" data-testid="mode-hint"></p>
+
+        <label data-i18n="moderator_label">Агент-модератор</label>
+        <select id="moderator-select" data-testid="moderator-select"></select>
+      </div>
+    </aside>
+
+    <!-- CENTER: workspace -->
+    <section class="workspace">
+      <div class="prompt-card glass" data-testid="prompt-card">
+        <h1 data-i18n="ask_title">Что обсуждаем?</h1>
+        <textarea id="user-prompt" rows="4"
+                  data-testid="user-prompt"
+                  placeholder="Опиши задачу. Агенты обсудят её между собой и выдадут общий ответ."></textarea>
+        <div class="prompt-actions">
+          <button id="run-btn" class="run-btn" data-testid="run-btn">
+            <span data-i18n="run">Запустить совещание</span>
+            <span class="kbd">⏎</span>
+          </button>
+          <button id="stop-btn" class="ghost-btn" data-testid="stop-btn" disabled data-i18n="stop">Остановить</button>
+        </div>
+      </div>
+
+      <div class="results" id="results" data-testid="results">
+        <div class="empty-state" id="empty-state" data-testid="empty-state">
+          <div class="empty-grid">
+            <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+          </div>
+          <p data-i18n="empty_hint">Добавьте минимум 2 агентов и задайте вопрос. Они проведут несколько раундов обсуждения и выдадут единый ответ.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- AGENT EDITOR MODAL -->
+  <div class="modal" id="agent-modal" data-testid="agent-modal" hidden>
+    <div class="modal-box glass">
+      <header class="modal-head">
+        <h3 id="agent-modal-title" data-i18n="agent_editor">Агент</h3>
+        <button class="icon-btn" data-close="agent-modal" data-testid="close-agent-modal">×</button>
+      </header>
+      <div class="modal-body">
+        <div class="grid-2">
+          <div>
+            <label data-i18n="alias_label">Имя / псевдоним</label>
+            <input id="a-alias" type="text" placeholder="Архитектор, Скептик, Поэт..." data-testid="a-alias" />
+          </div>
+          <div>
+            <label data-i18n="provider_label">Провайдер</label>
+            <select id="a-provider" data-testid="a-provider"></select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label data-i18n="model_label">Модель</label>
+            <input id="a-model" type="text" list="model-suggestions" autocomplete="off" data-testid="a-model" />
+            <datalist id="model-suggestions"></datalist>
+            <p class="hint" data-i18n="model_hint">Подсказки появятся при наборе. Автовставки нет.</p>
+          </div>
+          <div>
+            <label data-i18n="apikey_label">API-ключ</label>
+            <div class="input-row">
+              <input id="a-key" type="password" placeholder="sk-..." data-testid="a-key" />
+              <button class="icon-btn" id="toggle-key" data-testid="toggle-key" title="show/hide">👁</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label data-i18n="endpoint_label">Endpoint (для Custom — полный URL chat-completions)</label>
+          <input id="a-endpoint" type="text" placeholder="https://api.example.com/v1/chat/completions" data-testid="a-endpoint" />
+        </div>
+
+        <div>
+          <label data-i18n="role_label">Роль / системная инструкция</label>
+          <textarea id="a-role" rows="4" placeholder="Ты — критически мыслящий рецензент..." data-testid="a-role"></textarea>
+        </div>
+
+        <div class="grid-3">
+          <div>
+            <label>Temperature</label>
+            <input id="a-temp" type="number" step="0.1" min="0" max="2" value="0.7" data-testid="a-temp" />
+          </div>
+          <div>
+            <label data-i18n="color_label">Цвет</label>
+            <input id="a-color" type="color" value="#7af0ff" data-testid="a-color" />
+          </div>
+          <div>
+            <label data-i18n="enabled_label">Активен</label>
+            <label class="switch">
+              <input id="a-enabled" type="checkbox" checked data-testid="a-enabled" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <footer class="modal-foot">
+        <button class="ghost-btn danger" id="delete-agent" data-testid="delete-agent" data-i18n="delete">Удалить</button>
+        <div class="spacer"></div>
+        <button class="ghost-btn" data-close="agent-modal" data-i18n="cancel">Отмена</button>
+        <button class="primary-btn" id="save-agent" data-testid="save-agent" data-i18n="save">Сохранить</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal" id="settings-modal" data-testid="settings-modal" hidden>
+    <div class="modal-box glass">
+      <header class="modal-head">
+        <h3 data-i18n="settings">Настройки</h3>
+        <button class="icon-btn" data-close="settings-modal">×</button>
+      </header>
+      <div class="modal-body">
+        <p class="hint" data-i18n="settings_hint">Все данные хранятся только в вашем браузере (localStorage). Ничего не отправляется на наши серверы — у нас их нет.</p>
+
+        <label data-i18n="default_provider">Провайдер по умолчанию</label>
+        <select id="default-provider" data-testid="default-provider"></select>
+
+        <label data-i18n="default_key">Общий API-ключ (необязательно — будет подставлен в новых агентах)</label>
+        <input id="default-key" type="password" data-testid="default-key" />
+
+        <label data-i18n="cors_note_title">⚠ О CORS</label>
+        <p class="hint" data-i18n="cors_note">Большинство провайдеров (OpenRouter, Groq, OpenAI, Gemini, DeepSeek, Mistral, Together, xAI, Perplexity, Cohere) разрешают вызовы из браузера. Anthropic требует заголовок <code>anthropic-dangerous-direct-browser-access</code> — он добавляется автоматически.</p>
+
+        <div class="grid-2">
+          <button class="ghost-btn" id="export-config" data-testid="export-config" data-i18n="export">Экспорт JSON</button>
+          <label class="ghost-btn file-btn">
+            <span data-i18n="import">Импорт JSON</span>
+            <input id="import-config" type="file" accept="application/json" hidden data-testid="import-config" />
+          </label>
+        </div>
+      </div>
+      <footer class="modal-foot">
+        <div class="spacer"></div>
+        <button class="primary-btn" data-close="settings-modal" data-i18n="ok">Готово</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast" data-testid="toast" hidden></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
